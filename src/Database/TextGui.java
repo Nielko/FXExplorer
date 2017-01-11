@@ -13,6 +13,7 @@ public class TextGui {
 	public static String ButtonSaveText = "G speichern";
 	public static String ButtonLoadTooltip = "Graph laden";
 	public static String ButtonSaveTooltip = "Graph speichern";
+	public static String TextNotImplemented = "Feature nicht implementiert...";
 	
 	public static String KnotSettingsBigConnections = "Dicke Verbindungen";
 	public static String KnotSettingsBlur = "Blur";
