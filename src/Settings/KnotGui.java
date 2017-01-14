@@ -153,9 +153,16 @@ public class KnotGui{
 	
 	public String getFileFromFileChooser()
 	{
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Datei auswählen");
-		return fileChooser.showOpenDialog(stage).getAbsolutePath();
+		try
+		{
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.setTitle("Datei auswählen");
+			return fileChooser.showOpenDialog(stage).getAbsolutePath();
+		}
+		catch(Exception e)
+		{
+			return null;
+		}
 	}
 
 }

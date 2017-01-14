@@ -72,7 +72,6 @@ public class Logic {
 			public void mouseClicked(double x, double y, boolean rightClick) {
 				if(!rightClick)
 				{
-					
 					selectedKnot = graph.getKnot(new Point((int) x,(int) y), 30);
 					oldX = (int) x;
 					oldY = (int) y;

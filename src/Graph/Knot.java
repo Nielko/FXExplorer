@@ -14,6 +14,7 @@ public class Knot implements Serializable{
 	public boolean VisibleSubKnots = true;
 	public String ImgFile = "folder.png";
 	public String WeblinkImg = "weblink.png";
+	public String GraphImg = "icon.png";
 	public String File;
 	
 	public Knot(String name)
@@ -36,6 +37,13 @@ public class Knot implements Serializable{
 	{
 		if(File != null)
 			return File.contains("http") || File.contains(".com") || File.contains(".de");
+		return false;
+	}
+	
+	public boolean isGraph()
+	{
+		if(File != null)
+			return File.contains(".ser");
 		return false;
 	}
 	

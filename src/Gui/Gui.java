@@ -324,6 +324,8 @@ public class Gui {
 			myCanvasCircles.drawImage(knot.ImgFile, knot.position.x, knot.position.y, sizeSubKnot*2-10);
 			if(knot.isWebLink())
 				myCanvasCircles.drawImage(knot.WeblinkImg, knot.position.x-20, knot.position.y+20, sizeSubKnot);
+			else if(knot.isGraph())
+				myCanvasCircles.drawImage(knot.GraphImg, knot.position.x-20, knot.position.y+20, sizeSubKnot);
 			else if(knot.File != null && !knot.File.equals(""))
 				myCanvasCircles.drawImage(sysIcon.getFileIcon(knot.File), knot.position.x-20, knot.position.y+20, sizeSubKnot);
 		}
@@ -442,6 +444,10 @@ public class Gui {
 			if(file.contains("http") || file.contains(".com") || file.contains(".de"))
 			{
 				Desktop.getDesktop().browse(new URI(file));
+			}
+			else if(file.contains(".ser"))
+			{
+				this.listener.loadFile(file);
 			}
 			else
 			{

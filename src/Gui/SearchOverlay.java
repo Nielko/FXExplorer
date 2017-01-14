@@ -45,7 +45,7 @@ public class SearchOverlay {
         textSearch.setOpacity(0);
         pane.getChildren().add(textSearch);
         
-        Button btnSave = new Button(Database.TextGui.ButtonLoadText);
+        Button btnSave = new Button(Database.TextGui.ButtonSaveText);
         btnSave.setTooltip(new Tooltip(Database.TextGui.ButtonLoadTooltip));
         pane.getChildren().add(btnSave);
         btnSave.relocate(20,50);
