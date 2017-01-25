@@ -11,6 +11,7 @@ import Gui.GuiListener.RightClicked;
 import Settings.KnotGui;
 import Settings.SettingsGui;
 import Start.FXExplorer;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -20,11 +21,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tooltip;
+import javafx.scene.effect.*;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -57,6 +61,7 @@ public class Gui {
 	private boolean isDragging;
 	private SystemFileIcon sysIcon;
 	private SearchOverlay searchOverlay;
+	private FrostyBackground frostyBack;
 
 	public Gui(Stage primaryStage)
 	{
@@ -64,6 +69,8 @@ public class Gui {
 		primaryStage.getIcons().add(new Image(this.getClass().getResourceAsStream("/icon.png")));
 		primaryStage.initStyle(StageStyle.UNDECORATED);
     	primaryStage.initStyle(StageStyle.TRANSPARENT);
+    	
+    	
     	
 		this.primaryStage = primaryStage;
 		init();
@@ -92,13 +99,19 @@ public class Gui {
 	public void init()
 	{
 		pane = new Pane();
+		scene = new Scene(pane, 600,700);
+		primaryStage.setScene(scene);
+        primaryStage.show();
 		sysIcon = new  SystemFileIcon();
+		
+		// Frosty-Background-Effekt
+		frostyBack = new FrostyBackground(pane, primaryStage, this);
     	
 		canvasStatic = new Canvas(FXExplorer.SIZE_X, FXExplorer.SIZE_Y);
-        pane.getChildren().add(0, canvasStatic);
+        pane.getChildren().add(1, canvasStatic);
         
         canvasCircles = new Canvas(FXExplorer.SIZE_X, FXExplorer.SIZE_Y);
-        pane.getChildren().add(1, canvasCircles);
+        pane.getChildren().add(2, canvasCircles);
         myCanvasStatic = new MyCanvas(canvasStatic);
         myCanvasCircles = new MyCanvas(canvasCircles);
         
@@ -129,9 +142,7 @@ public class Gui {
         mouseOverText.relocate(-100, -100);
         pane.getChildren().add(mouseOverText);
         
-        scene = new Scene(pane, FXExplorer.SIZE_X, FXExplorer.SIZE_Y);
         
-        primaryStage.setScene(scene);
         scene.getStylesheets().add(FXExplorer.class.getResource("/Login.css").toExternalForm());
         scene.setFill(null);
 
@@ -181,13 +192,13 @@ public class Gui {
                  {
                  	listener.mouseReleased(mouseEvent.getX(), mouseEvent.getY());
                  }
-      
+            	 
             }
         });
-        primaryStage.show();
+        
         setContentMenu();
         
-        new WindowBar(this);
+        new WindowBar(this, this.frostyBack);
         this.searchOverlay = new SearchOverlay(this);
         this.searchOverlay.changeOpacity();
 	}
@@ -280,6 +291,7 @@ public class Gui {
 	{
 		this.removeAllButtons();
 		this.initGraph(this.graph);
+		//this.frostyBack.updateBackground();
 	}
 	
 	/**
@@ -320,8 +332,8 @@ public class Gui {
 				new AnimationGui().makeAnimations(knot, this);
 			myCanvasStatic.drawShapes(knot.positionGui.x,knot.positionGui.y, 
 				knotBig.positionGui.x, knotBig.positionGui.y, sizeSubKnot, sizeSubKnot);
-			myCanvasCircles.drawCircle(knot.position.x, knot.position.y, sizeSubKnot);
-			myCanvasCircles.drawImage(knot.ImgFile, knot.position.x, knot.position.y, sizeSubKnot*2-10);
+			myCanvasStatic.drawCircle(knot.position.x, knot.position.y, sizeSubKnot);
+			myCanvasStatic.drawImage(knot.ImgFile, knot.position.x, knot.position.y, sizeSubKnot*2-10);
 			if(knot.isWebLink())
 				myCanvasCircles.drawImage(knot.WeblinkImg, knot.position.x-20, knot.position.y+20, sizeSubKnot);
 			else if(knot.isGraph())
@@ -332,7 +344,7 @@ public class Gui {
 		else // Nur den MainKnot malen
 		{
 			knot.position = knot.positionGui;
-			myCanvasCircles.drawCircle(knot.positionGui.x, knot.positionGui.y, sizeMainKnot);
+			myCanvasStatic.drawCircle(knot.positionGui.x, knot.positionGui.y, sizeMainKnot);
 			myCanvasCircles.drawImage(knot.ImgFile, knot.positionGui.x, knot.positionGui.y, sizeMainKnot*2-10);
 		}
 		
@@ -473,6 +485,8 @@ public class Gui {
 		this.primaryStage.setWidth(FXExplorer.SIZE_X);
 		this.primaryStage.setHeight(FXExplorer.SIZE_Y);
 	}
+	
+	
 	
 	
 	

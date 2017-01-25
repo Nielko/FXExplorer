@@ -9,10 +9,12 @@ import javafx.scene.layout.FlowPane;
 
 public class WindowBar {
 	private Gui gui;
+	private FrostyBackground frostyBack; //Für die Aktualisierung des Hintergrunds
 	
-	public WindowBar(Gui gui)
+	public WindowBar(Gui gui, FrostyBackground frostyBack)
 	{
 		this.gui = gui;
+		this.frostyBack = frostyBack;
 		final FlowPane pane = new FlowPane();
 		pane.setAlignment(Pos.TOP_LEFT);
 		pane.setHgap(15);
@@ -56,12 +58,29 @@ public class WindowBar {
             }
         });
 		
+		btnMove.setOnMousePressed(new EventHandler<MouseEvent>() {
+
+            @Override
+            public void handle(MouseEvent event) {
+            	frostyBack.mousePressed(event);
+            }
+        });
+		
+		btnMove.setOnMouseReleased(new EventHandler<MouseEvent>() {
+
+            @Override
+            public void handle(MouseEvent event) {
+            	frostyBack.mouseReleased(event);
+            }
+        });
+		
 		btnMove.setOnMouseDragged(new EventHandler<MouseEvent>() {
 
 			@Override
 			public void handle(MouseEvent event) {
 				gui.primaryStage.setX(event.getScreenX()-95);
 				gui.primaryStage.setY(event.getScreenY()-15);
+				
 			}
         });
 	}

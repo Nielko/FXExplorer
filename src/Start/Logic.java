@@ -199,6 +199,7 @@ public class Logic {
 				graph = database.graphs.get(0);
 				gui.removeAllButtons();
 				gui.initGraph(graph);
+				allKnots = graph.getAllKnots();
 			}
 
 			@Override

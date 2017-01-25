@@ -3,7 +3,7 @@ root {
 }
 .root {
 	/*-fx-background-image: url("background.jpg");	rgba(0, 50, 255, 0.1);*/
-	-fx-background-color: rgba(220, 220, 220, 0.4);
+	-fx-background-color: rgba(230, 230, 230, 0.3);
 	-fx-background-radius: 0;
 	-fx-border: 10px;
 }
