@@ -2,38 +2,27 @@ package Gui;
 import java.awt.Desktop;
 import java.awt.Point;
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 
 import Graph.Graph;
 import Graph.Knot;
-import Gui.GuiListener.RightClicked;
+import GuiElements.GraphGui;
 import GuiElements.SearchOverlay;
 import GuiElements.WindowBar;
-import Settings.KnotGui;
 import Settings.SettingsGui;
 import Start.FXExplorer;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tooltip;
-import javafx.scene.effect.*;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.ContextMenuEvent;
-import javafx.scene.input.DragEvent;
-import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -43,25 +32,22 @@ import javafx.stage.StageStyle;
 
 public class Gui {
 	public Stage primaryStage;
+	private GraphGui graphGui;
 	private MyCanvas myCanvasStatic;
 	private MyCanvas myCanvasCircles;
 	private Text mouseOverText;
 	
 	public static final int MAX_BUTTONS = 50;
 
-	private Button[] buttons;
-	private Text[] text;
 	private long clickTimeDifference;
 	public GuiListener listener;
 	public Pane pane;
-	private EHandler eHandler;
 	public boolean isEditMode = true; // Zeichnet kleine Kreuze in den Mittelpunkten
 	private MenuItem newSubKnot;
 	private MenuItem deleteSubKnot;
 	private MenuItem changeKnotPaths;
 	private Graph graph;
 	private Scene scene;
-	private boolean isDragging;
 	private SystemFileIcon sysIcon;
 	private SearchOverlay searchOverlay;
 	private FrostyBackground frostyBack;
@@ -86,15 +72,7 @@ public class Gui {
 	
 	public void removeAllButtons()
 	{
-		//pane.getChildren().clear(); //-- Löscht wirklich alles
-		if(buttons != null)
-			for(int i = 0; i < buttons.length; i++)
-	        {
-				if(buttons[i] != null)
-					pane.getChildren().remove(buttons[i]);
-				if(text[i] != null)
-					pane.getChildren().remove(text[i]);
-	        }
+		this.graphGui.clearAll();
 		myCanvasStatic.clearAll();
 		myCanvasCircles.clearAll();
 	}
@@ -111,10 +89,11 @@ public class Gui {
 		frostyBack = new FrostyBackground(pane, primaryStage, this);
     	
 		// Canvas für statische und flexible Elemente hinzufügen
+		graphGui = new GraphGui(pane, FXExplorer.SIZE_X, FXExplorer.SIZE_Y);
         myCanvasStatic = new MyCanvas(FXExplorer.SIZE_X, FXExplorer.SIZE_Y);
         myCanvasCircles = new MyCanvas(FXExplorer.SIZE_X, FXExplorer.SIZE_Y);
-        pane.getChildren().add(1, myCanvasStatic);
-        pane.getChildren().add(2, myCanvasCircles);
+        pane.getChildren().add(2, myCanvasStatic);
+        pane.getChildren().add(3, myCanvasCircles);
         
        
         
@@ -129,14 +108,8 @@ public class Gui {
         pane.getChildren().add(btnSettings);
         btnSettings.relocate(10,100);
         btnSettings.getStyleClass().add("buttonO");
-        
-        Button btnUp = new Button("");
-        pane.getChildren().add(btnUp);
-        btnUp.relocate(300,10);
-        btnUp.getStyleClass().add("buttonO");
-        btnUp.getStyleClass().add("buttonO_big");
-        btnUp.getStyleClass().add("folder");
-        setActionListener(btnUp, btnLoad, btnSettings);
+
+        setActionListener(btnLoad, btnSettings);
         
         mouseOverText = new Text();
         mouseOverText.relocate(-100, -100);
@@ -246,22 +219,8 @@ public class Gui {
 	    });
 	}
 	
-	private void setActionListener(
-			Button btnUp, Button btnLoad, Button btnSettings)
+	private void setActionListener(Button btnLoad, Button btnSettings)
 	{
-		
-        
-        btnUp.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent e) {
-                if(listener != null)
-                {
-                	// ToDo: Listener auf alle Buttons erweitern
-                	listener.buttonUpClicked();
-                }
-            }
-        });
         
         // FileChooser aufrufen, nur wenn eine Datei gewählt wurde den Listener aufrufen
         btnLoad.setOnAction(new EventHandler<ActionEvent>() {
@@ -284,8 +243,6 @@ public class Gui {
                 new SettingsGui(Gui.this, graph.graphSettings);
             }
         });
-        
-        eHandler = new EHandler();
 	}
 	
 	public void redraw()
@@ -303,6 +260,7 @@ public class Gui {
 		this.graph = graph;
 		this.myCanvasCircles.setGraphSettings(graph.graphSettings);
 		this.myCanvasStatic.setGraphSettings(graph.graphSettings);
+		this.graphGui.setGraphSettings(graph.graphSettings);
 		try
 		{	
 			// Alle abhängigen Knoten zeichnen
@@ -333,8 +291,8 @@ public class Gui {
 		
 		if(knotBig != null) // Knoten und Verbindung zum übergeordneten Knoten malen
 		{
-			myCanvasStatic.drawShapes(knot.positionGui.x,knot.positionGui.y, 
-				knotBig.positionGui.x, knotBig.positionGui.y, sizeSubKnot, sizeSubKnot);
+			graphGui.drawConnection(knot.positionGui.x,knot.positionGui.y, 
+					knotBig.positionGui.x, knotBig.positionGui.y, sizeSubKnot, sizeSubKnot);
 			drawKnot(knot, sizeSubKnot);
 		}
 		else // Nur den MainKnot malen
@@ -366,14 +324,14 @@ public class Gui {
 		else if(knot.isGraph())
 			myCanvasCircles.drawImage(knot.GraphImg, knot.position.x-20, knot.position.y+20, sizeSubKnot);
 		else if(knot.File != null && !knot.File.equals(""))
-			myCanvasCircles.drawImage(sysIcon.getFileIcon(knot.File), knot.position.x-20, knot.position.y+20, sizeSubKnot);
+			myCanvasCircles.drawImage(SystemFileIcon.getFileIcon(knot.File), knot.position.x-20, knot.position.y+20, sizeSubKnot);
 	}
 	
 	public void drawTempKnot(Knot knot)
 	{
 		Knot parentKnot = this.graph.getParentKnot(knot);
 		if(parentKnot != null)
-			myCanvasCircles.drawConnection(parentKnot.positionGui.x, parentKnot.positionGui.y,
+			myCanvasCircles.drawThinConnection(parentKnot.positionGui.x, parentKnot.positionGui.y,
 				knot.positionGui.x, knot.positionGui.y);
 		myCanvasCircles.clear(knot.positionGui.x,knot.positionGui.y, 50);
 		myCanvasCircles.drawCircle(knot.positionGui.x,knot.positionGui.y, 30);
@@ -388,61 +346,6 @@ public class Gui {
 		if(isEditMode)
 			myCanvasCircles.drawCross(knot.position.x,knot.position.y, 8);
 	}
-	
-	/**
-	 * Graphen initialiseren mit String-Array und einzelnen Layer
-	 */
-	public void initGraph(String[] files, boolean[] isFolders, int[] layer)
-	{
-		int tempLayer = 0;
-		buttons = new Button[MAX_BUTTONS];
-    	text = new Text[MAX_BUTTONS];
-    	
-    	//canvas = new Canvas(1000, 2500);
-        //pane.getChildren().add(0, canvas);
-    	
-        
-        // Strukturen zeichnen
-        drawStructure(files, layer);
-        
-        //Buttons und Texte erstellen
-        for(int i = 0; i < files.length; i++)
-        {
-        	text[i] = new Text(files[i]);
-        	text[i].getStyleClass().add("titleButton");
-        	text[i].setOpacity(1);
-        	text[i].relocate(100,i*80+40);
-        	pane.getChildren().add(text[i]);
-            buttons[i] = new Button("");
-            pane.getChildren().add(buttons[i]);
-            buttons[i].getStyleClass().add("buttonO");
-            if(isFolders != null &&  isFolders[i])
-            	 buttons[i].getStyleClass().add("folder");
-            buttons[i].relocate(50,i*80+40);
-            buttons[i].setOpacity(1);
-            buttons[i].setOnAction(eHandler);
-        }
-	}
-	
-	private void drawStructure(String files[], int[] layer)
-    {
-		if(layer != null)
-			for(int i = 0; i < files.length; i++)
-			{
-				myCanvasCircles.drawShapes(200-20*layer[i],i*80+40, 400, 250, 30, 60);
-				if(isEditMode)
-					myCanvasCircles.drawCross(200-20*layer[i],i*80+40, 8);
-			}
-		else
-			for(int i = 0; i < files.length; i++)
-			{
-				myCanvasCircles.drawShapes(50,i*80+40, 400, 250, 30, 60);
-				if(isEditMode)
-					myCanvasCircles.drawCross(50,i*80+40, 8);
-			}
-		
-		myCanvasCircles.addShadow();
-    }
 	
 	public String getFileFromFileChooser(boolean saveDialog)
 	{
@@ -500,30 +403,4 @@ public class Gui {
 		this.primaryStage.setHeight(FXExplorer.SIZE_Y);
 	}
 	
-	
-	
-	
-	class EHandler implements EventHandler<ActionEvent>
-	{
-		@Override
-		public void handle(ActionEvent event) {
-			for(int i = 0; i < buttons.length; i++)
-	        {
-				if(event.getSource() == buttons[i])
-					listener.buttonClicked(i);
-	        }
-		}	
-	}
-	
-	class EHandlerMouseEntry implements EventHandler<ActionEvent>
-	{
-		@Override
-		public void handle(ActionEvent event) {
-			for(int i = 0; i < buttons.length; i++)
-	        {
-				if(event.getSource() == buttons[i])
-					listener.buttonClicked(i);
-	        }
-		}	
-	}
 }

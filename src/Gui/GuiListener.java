@@ -4,8 +4,6 @@ import javafx.event.ActionEvent;
 public interface GuiListener {
 	public static enum RightClicked {NEW, DELETE, CHANGE_IMG, CHANGING};
 	public void buttonExitClicked();
-	public void buttonUpClicked();
-	public void buttonClicked(int number);
 	public void loadFile(String file);
 	public void saveFile(String file);
 	public void contextMenuClicked(RightClicked clicked);

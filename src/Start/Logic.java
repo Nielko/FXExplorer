@@ -50,25 +50,6 @@ public class Logic {
 		{
 
 			@Override
-			public void buttonClicked(int i) {
-				
-				// Ordner-Button wurde geklickt -> Gui aufräumen & neuen Graph erstellen
-				gui.removeAllButtons();
-				fileExplorer.goTo(fileExplorer.listFiles()[i]);
-				gui.initGraph(fileExplorer.listFiles(), fileExplorer.isFolders(), null);
-			}
-
-			@Override
-			public void buttonUpClicked() {
-				
-				// Ordner-Button wurde geklickt -> Gui aufräumen & neuen Graph erstellen
-				gui.removeAllButtons();
-				fileExplorer.goUp();
-				gui.initGraph(fileExplorer.listFiles(), fileExplorer.isFolders(), null);
-				
-			}
-
-			@Override
 			public void mouseClicked(double x, double y, boolean rightClick) {
 				// Linksklick: Selektierten Knoten speichern
 				if(!rightClick)
