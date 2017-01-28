@@ -8,6 +8,8 @@ import java.net.URI;
 import Graph.Graph;
 import Graph.Knot;
 import Gui.GuiListener.RightClicked;
+import GuiElements.SearchOverlay;
+import GuiElements.WindowBar;
 import Settings.KnotGui;
 import Settings.SettingsGui;
 import Start.FXExplorer;
@@ -25,8 +27,11 @@ import javafx.scene.effect.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -38,8 +43,6 @@ import javafx.stage.StageStyle;
 
 public class Gui {
 	public Stage primaryStage;
-	private Canvas canvasStatic;
-	private Canvas canvasCircles;
 	private MyCanvas myCanvasStatic;
 	private MyCanvas myCanvasCircles;
 	private Text mouseOverText;
@@ -107,14 +110,11 @@ public class Gui {
 		// Frosty-Background-Effekt
 		frostyBack = new FrostyBackground(pane, primaryStage, this);
     	
-		canvasStatic = new Canvas(FXExplorer.SIZE_X, FXExplorer.SIZE_Y);
-        pane.getChildren().add(1, canvasStatic);
-        
-        canvasCircles = new Canvas(FXExplorer.SIZE_X, FXExplorer.SIZE_Y);
-        pane.getChildren().add(2, canvasCircles);
-        myCanvasStatic = new MyCanvas(canvasStatic);
-        myCanvasCircles = new MyCanvas(canvasCircles);
-        
+		// Canvas für statische und flexible Elemente hinzufügen
+        myCanvasStatic = new MyCanvas(FXExplorer.SIZE_X, FXExplorer.SIZE_Y);
+        myCanvasCircles = new MyCanvas(FXExplorer.SIZE_X, FXExplorer.SIZE_Y);
+        pane.getChildren().add(1, myCanvasStatic);
+        pane.getChildren().add(2, myCanvasCircles);
         
        
         
@@ -196,6 +196,7 @@ public class Gui {
             }
         });
         
+        // Rechtsklickmenü, Fensterleiste, Suche, DragAndDrop initialisieren
         setContentMenu();
         
         new WindowBar(this, this.frostyBack);
@@ -221,7 +222,7 @@ public class Gui {
 	{
 		final ContextMenu contextMenu = new ContextMenu();
 		newSubKnot = new MenuItem("Neuer Unterpunkt");
-		newSubKnot.setDisable(true);
+		//newSubKnot.setDisable(true);
 		deleteSubKnot = new MenuItem("Unterpunkt löschen");
 		deleteSubKnot.setDisable(true);
 		changeKnotPaths = new MenuItem("Bild-/Pfad ändern");
@@ -304,7 +305,11 @@ public class Gui {
 		this.myCanvasStatic.setGraphSettings(graph.graphSettings);
 		try
 		{	
+			// Alle abhängigen Knoten zeichnen
 			expandDrawKnot(null, graph.mainKnot);
+			// Alle freien Knoten zeichnen
+			for( Knot knot: graph.freeKnots )
+				this.drawKnot(knot, 30);
 			
 			if(graph.graphSettings.blur)
         	{
@@ -328,18 +333,9 @@ public class Gui {
 		
 		if(knotBig != null) // Knoten und Verbindung zum übergeordneten Knoten malen
 		{
-			if(knot.position.distance(knot.positionGui) > 5)
-				new AnimationGui().makeAnimations(knot, this);
 			myCanvasStatic.drawShapes(knot.positionGui.x,knot.positionGui.y, 
 				knotBig.positionGui.x, knotBig.positionGui.y, sizeSubKnot, sizeSubKnot);
-			myCanvasStatic.drawCircle(knot.position.x, knot.position.y, sizeSubKnot);
-			myCanvasStatic.drawImage(knot.ImgFile, knot.position.x, knot.position.y, sizeSubKnot*2-10);
-			if(knot.isWebLink())
-				myCanvasCircles.drawImage(knot.WeblinkImg, knot.position.x-20, knot.position.y+20, sizeSubKnot);
-			else if(knot.isGraph())
-				myCanvasCircles.drawImage(knot.GraphImg, knot.position.x-20, knot.position.y+20, sizeSubKnot);
-			else if(knot.File != null && !knot.File.equals(""))
-				myCanvasCircles.drawImage(sysIcon.getFileIcon(knot.File), knot.position.x-20, knot.position.y+20, sizeSubKnot);
+			drawKnot(knot, sizeSubKnot);
 		}
 		else // Nur den MainKnot malen
 		{
@@ -359,8 +355,26 @@ public class Gui {
 		}
 	}
 	
+	public void drawKnot(Knot knot, int sizeSubKnot)
+	{
+		if(knot.position.distance(knot.positionGui) > 5)
+			new AnimationGui().makeAnimations(knot, this);
+		myCanvasStatic.drawCircle(knot.position.x, knot.position.y, sizeSubKnot);
+		myCanvasStatic.drawImage(knot.ImgFile, knot.position.x, knot.position.y, sizeSubKnot*2-10);
+		if(knot.isWebLink())
+			myCanvasCircles.drawImage(knot.WeblinkImg, knot.position.x-20, knot.position.y+20, sizeSubKnot);
+		else if(knot.isGraph())
+			myCanvasCircles.drawImage(knot.GraphImg, knot.position.x-20, knot.position.y+20, sizeSubKnot);
+		else if(knot.File != null && !knot.File.equals(""))
+			myCanvasCircles.drawImage(sysIcon.getFileIcon(knot.File), knot.position.x-20, knot.position.y+20, sizeSubKnot);
+	}
+	
 	public void drawTempKnot(Knot knot)
 	{
+		Knot parentKnot = this.graph.getParentKnot(knot);
+		if(parentKnot != null)
+			myCanvasCircles.drawConnection(parentKnot.positionGui.x, parentKnot.positionGui.y,
+				knot.positionGui.x, knot.positionGui.y);
 		myCanvasCircles.clear(knot.positionGui.x,knot.positionGui.y, 50);
 		myCanvasCircles.drawCircle(knot.positionGui.x,knot.positionGui.y, 30);
 		if(isEditMode)
@@ -485,7 +499,6 @@ public class Gui {
 		this.primaryStage.setWidth(FXExplorer.SIZE_X);
 		this.primaryStage.setHeight(FXExplorer.SIZE_Y);
 	}
-	
 	
 	
 	

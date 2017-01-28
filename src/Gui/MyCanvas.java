@@ -10,14 +10,22 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 
-public class MyCanvas {
+public class MyCanvas extends Canvas{
 	private GraphicsContext gc;
 	private GraphSettings settings;
 	public boolean ThickConnections;
 	
 	public MyCanvas(Canvas canvas)
 	{
+		super(0,0);
 		 gc = canvas.getGraphicsContext2D();
+		 gc.setFill(new Color(0.1,1,0.1, 1));
+	}
+	
+	public MyCanvas(int sizeX, int sizeY)
+	{
+		super(sizeX, sizeY);
+		gc = this.getGraphicsContext2D();
 		 gc.setFill(new Color(0.1,1,0.1, 1));
 	}
 	
@@ -30,6 +38,12 @@ public class MyCanvas {
 	{
 		gc.setFill(settings.getColor());
 		gc.fillOval(x-r, y-r, r*2, r*2);
+	}
+	
+	public void drawConnection(int x1, int y1, int x2, int y2)
+	{
+		gc.setStroke(settings.getGrayColor());
+		gc.strokeLine(x1, y1, x2, y2);
 	}
 	
 	public void drawThinCircle(int x, int y, int r)

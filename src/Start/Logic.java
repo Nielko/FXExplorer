@@ -70,6 +70,7 @@ public class Logic {
 
 			@Override
 			public void mouseClicked(double x, double y, boolean rightClick) {
+				// Linksklick: Selektierten Knoten speichern
 				if(!rightClick)
 				{
 					selectedKnot = graph.getKnot(new Point((int) x,(int) y), 30);
@@ -127,9 +128,14 @@ public class Logic {
 				{
 				case NEW:
 					System.out.println("Logic.contextMenuClicked: New Knot");
-					Point knotP = (Point) selectedKnot.positionGui.clone();
-					knotP.translate(-80, -80);
-					selectedKnot.subKnots.add(new Knot("Test", knotP));
+					if(selectedKnot != null)
+					{
+						Point knotP = (Point) selectedKnot.positionGui.clone();
+						knotP.translate(-80, -80);
+						selectedKnot.subKnots.add(new Knot("Knoten", knotP));
+					}
+					else
+						graph.freeKnots.add(new Knot("Knoten"));
 					gui.removeAllButtons();
 					gui.initGraph(graph);
 					break;

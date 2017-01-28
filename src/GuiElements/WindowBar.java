@@ -1,5 +1,7 @@
-package Gui;
+package GuiElements;
 
+import Gui.FrostyBackground;
+import Gui.Gui;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;

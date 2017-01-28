@@ -25,6 +25,11 @@ public class GraphSettings implements Serializable{
 		return new Color(r,g,b,a);
 	}
 	
+	public Color getGrayColor()
+	{
+		return new Color(0.8,0.8,0.8,0.3f);
+	}
+	
 	public void setColor(Color color)
 	{
 		r = color.getRed();
