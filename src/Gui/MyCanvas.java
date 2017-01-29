@@ -40,9 +40,10 @@ public class MyCanvas extends Canvas{
 		gc.fillOval(x-r, y-r, r*2, r*2);
 	}
 	
-	public void drawThinConnection(int x1, int y1, int x2, int y2)
+	public void drawThinConnection(int x1, int y1, int x2, int y2, Color color)
 	{
-		gc.setStroke(settings.getGrayColor());
+		gc.setStroke(color);
+		gc.setLineWidth(4);
 		gc.strokeLine(x1, y1, x2, y2);
 	}
 	

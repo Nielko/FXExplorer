@@ -23,6 +23,7 @@ import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -327,13 +328,23 @@ public class Gui {
 			myCanvasCircles.drawImage(SystemFileIcon.getFileIcon(knot.File), knot.position.x-20, knot.position.y+20, sizeSubKnot);
 	}
 	
-	public void drawTempKnot(Knot knot)
+	public void drawTempKnot(Knot knot, Knot parentKnot)
 	{
-		Knot parentKnot = this.graph.getParentKnot(knot);
+		myCanvasCircles.clearAll();
 		if(parentKnot != null)
-			myCanvasCircles.drawThinConnection(parentKnot.positionGui.x, parentKnot.positionGui.y,
-				knot.positionGui.x, knot.positionGui.y);
-		myCanvasCircles.clear(knot.positionGui.x,knot.positionGui.y, 50);
+		{
+			double dist = parentKnot.positionGui.distance(knot.positionGui);
+			if(dist < 300)
+				myCanvasCircles.drawThinConnection(parentKnot.positionGui.x, parentKnot.positionGui.y,
+						knot.positionGui.x, knot.positionGui.y, graph.graphSettings.getGrayColor());
+			else if(dist < 400)
+				myCanvasCircles.drawThinConnection(parentKnot.positionGui.x, parentKnot.positionGui.y,
+						knot.positionGui.x, knot.positionGui.y, new Color(1,0.5,0.1,1));
+			else
+				myCanvasCircles.drawThinConnection(parentKnot.positionGui.x, parentKnot.positionGui.y,
+						knot.positionGui.x, knot.positionGui.y, new Color(1,0.1,0.1,1));
+		}
+		//clear(knot.positionGui.x,knot.positionGui.y, 50);
 		myCanvasCircles.drawCircle(knot.positionGui.x,knot.positionGui.y, 30);
 		if(isEditMode)
 			myCanvasCircles.drawCross(knot.positionGui.x,knot.positionGui.y, 8);

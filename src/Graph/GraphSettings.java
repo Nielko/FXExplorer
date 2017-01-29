@@ -27,7 +27,7 @@ public class GraphSettings implements Serializable{
 	
 	public Color getGrayColor()
 	{
-		return new Color(0.8,0.8,0.8,0.3f);
+		return new Color(0.8,0.8,0.8,0.6f);
 	}
 	
 	public void setColor(Color color)

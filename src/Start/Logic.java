@@ -74,7 +74,27 @@ public class Logic {
 				if(click && selectedKnot != null && gui.isEditMode && !rightClick)
 				{
 					selectedKnot.positionGui = mousePoint;
-					gui.drawTempKnot(selectedKnot);
+					Knot parentKnot = graph.getParentKnot(selectedKnot);
+					gui.drawTempKnot(selectedKnot, parentKnot);
+					
+					// Verbundung lösen
+					if(parentKnot != null && parentKnot.positionGui.distance(selectedKnot.positionGui) > 440)
+					{
+						parentKnot.subKnots.remove(selectedKnot);
+						graph.freeKnots.add(selectedKnot);
+					}
+					else if(parentKnot == null) // Verbindung hinzufügen
+					{
+						for(Knot k: allKnots)
+						{
+							if(k != selectedKnot && k.positionGui.distance(selectedKnot.positionGui) < 40)
+							{
+								k.subKnots.add(selectedKnot);
+								graph.freeKnots.remove(selectedKnot);
+								System.out.println("Logic.mouseDragged: Verbindung wurde geschaffen mit "+k.name);
+							}
+						}
+					}
 				}
 				
 				for(int i = 0; i < allKnots.size(); i++)
