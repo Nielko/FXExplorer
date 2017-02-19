@@ -5,7 +5,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Knot implements Serializable{
+import Database.SerializableKnot;
+
+public class Knot{
 	public String name;
 	public List<Knot> subKnots;
 	public Point position;	// Ist-Position
@@ -17,13 +19,31 @@ public class Knot implements Serializable{
 	public String GraphImg = "icon.png";
 	public String File;
 	
+	public Knot(SerializableKnot knot)
+	{
+		name = knot.name;
+		subKnots = new ArrayList<Knot>();
+		for(SerializableKnot k: knot.subKnots )
+		{
+			subKnots.add(new Knot(k));
+		}
+		position = knot.position;
+		positionGui = position;
+		circleRadius = knot.circleRadius;
+		VisibleSubKnots = knot.VisibleSubKnots;
+		ImgFile = knot.ImgFile;
+		WeblinkImg = knot.WeblinkImg;
+		GraphImg = knot.GraphImg;
+		File = knot.File;
+	}
+	
 	public Knot(String name)
 	{
 		subKnots = new ArrayList<Knot>();
 		this.name = name;
-		this.position = new Point(100,100);
+		this.position = new Point((int) (50+Math.random()*200),(int) (50+Math.random()*200));
 		circleRadius = 20;
-		this.positionGui = new Point(100,100);
+		this.positionGui = (Point) position.clone();
 	}
 	
 	public Knot(String name, Point positon)
@@ -31,6 +51,12 @@ public class Knot implements Serializable{
 		this(name);
 		this.positionGui = positon;
 		this.position = positon;
+	}
+	
+	public Knot(String name, String file)
+	{
+		this(name);
+		this.File = file;
 	}
 	
 	public boolean isWebLink()
@@ -60,19 +86,21 @@ public class Knot implements Serializable{
 	 */
 	public void positionSubKnots()
 	{
-		int smallRadius = 80;
-		//SubKnots ohne Subs zählen
-		int subs = 0;
-		for(int i = 0; i < this.subKnots.size(); i++)
-			if(this.subKnots.get(i).subKnots.size() == 0)
-				subs++;
-		for(int i = 0; i < subs; i++)
-		{
-			if(i < 4)
-				this.subKnots.get(i).position = new Point(this.position.x-smallRadius+i*80, this.position.y-100); //  Kreis: (x-xm)²+(y-ym)²=r²
-			else
-				System.out.println("Knot.posSubs: für i > 3 nicht definiert!! - "+subs);
-				
-		}
+		// Konzept zum Anordnen der Subknots nach dem Bewegen
+		
+//		int smallRadius = 80;
+//		//SubKnots ohne Subs zählen
+//		int subs = 0;
+//		for(int i = 0; i < this.subKnots.size(); i++)
+//			if(this.subKnots.get(i).subKnots.size() == 0)
+//				subs++;
+//		for(int i = 0; i < subs; i++)
+//		{
+//			if(i < 4)
+//				this.subKnots.get(i).position = new Point(this.position.x-smallRadius+i*80, this.position.y-100); //  Kreis: (x-xm)²+(y-ym)²=r²
+//			else
+//				System.out.println("Knot.posSubs: für i > 3 nicht definiert!! - "+subs);
+//				
+//		}
 	}
 }

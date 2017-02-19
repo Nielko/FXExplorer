@@ -47,8 +47,8 @@ public class WindowBar {
 
             @Override
             public void handle(ActionEvent e) {
-            	gui.listener.buttonExitClicked();
-                System.exit(0);
+            	if(gui.listener.buttonExitClicked())
+            		System.exit(0);	// Programm schließen, wenn nicht abgebrochen wird
             }
         });
 		

@@ -2,11 +2,12 @@ package Graph;
 
 import java.io.Serializable;
 
+import Database.SerializableGraph;
 import javafx.scene.paint.Color;
 
 public class GraphSettings implements Serializable{
 	// Speichert r,g,b,a ab, Color ist nicht serialisierbar
-	private double r,g,b,a;
+	public double r,g,b,a;
 	public boolean thickPaths;
 	public boolean blur;
 	
@@ -18,6 +19,16 @@ public class GraphSettings implements Serializable{
 		a = 1;
 		thickPaths = true;
 		blur = false;
+	}
+	
+	public GraphSettings(SerializableGraph graph)
+	{
+		r = graph.r;
+		g = graph.g;
+		b = graph.b;
+		a = graph.a;
+		thickPaths = graph.thickPaths;
+		blur = graph.blur;
 	}
 	
 	public Color getColor()

@@ -46,17 +46,29 @@ public class SearchOverlay {
         textSearch.setOpacity(0);
         pane.getChildren().add(textSearch);
         
+        Button btnHome = new Button(Database.TextGui.ButtonHome);
+        pane.getChildren().add(btnHome);
+        btnHome.relocate(20,50);
+        btnHome.getStyleClass().add("buttonLarge");
+        
         Button btnSave = new Button(Database.TextGui.ButtonSaveText);
         btnSave.setTooltip(new Tooltip(Database.TextGui.ButtonLoadTooltip));
         pane.getChildren().add(btnSave);
-        btnSave.relocate(20,50);
+        btnSave.relocate(20,100);
         btnSave.getStyleClass().add("buttonLarge");
         
         Button btnLoad = new Button(Database.TextGui.ButtonLoadText);
         btnLoad.setTooltip(new Tooltip(Database.TextGui.ButtonLoadTooltip));
         pane.getChildren().add(btnLoad);
-        btnLoad.relocate(20,100);
+        btnLoad.relocate(20,150);
         btnLoad.getStyleClass().add("buttonLarge");
+        
+        Button btnNew = new Button(Database.TextGui.ButtonNew);
+        btnNew.setTooltip(new Tooltip(Database.TextGui.ButtonLoadTooltip));
+        pane.getChildren().add(btnNew);
+        btnNew.relocate(20,200);
+        btnNew.getStyleClass().add("buttonLarge");
+        
         
         // KeyEvent für das Textfeld
         text.setOnKeyPressed(new EventHandler<KeyEvent>()
@@ -74,21 +86,51 @@ public class SearchOverlay {
             }
         });
         
+        btnHome.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+            	if(pane.getOpacity() > 0)
+            	{
+            		gui.listener.loadFile(null); // Startseite aufrufen und dann verbergen
+            		hide();
+            	}
+            }
+        });
+        
         btnSave.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
-            	String file = gui.getFileFromFileChooser(true);
-            	if(file != null)
-            		gui.listener.saveFile(file);
+            	if(pane.getOpacity() > 0)
+            	{
+            		String file = gui.getFileFromFileChooser(true);
+            		if(file != null)
+            			gui.listener.saveFile(file);
+            		hide();
+            	}
             }
         });
         
         btnLoad.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
-            	String file = gui.getFileFromFileChooser(false);
-            	if(file != null)
-            		gui.listener.loadFile(file);
+            	if(pane.getOpacity() > 0)
+            	{
+	            	String file = gui.getFileFromFileChooser(false);
+	            	if(file != null)
+	            		gui.listener.loadFile(file);
+	            	hide();
+            	}
+            }
+        });
+        
+        btnNew.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+            	if(pane.getOpacity() > 0)
+            	{
+	            	gui.listener.newGraph();
+	            	hide();
+            	}
             }
         });
 	}
@@ -96,12 +138,15 @@ public class SearchOverlay {
 	public void changeOpacity()
 	{
 		if(pane.getOpacity() > 0)
-		{
-			pane.setOpacity(0);
-			resetSearch();
-		}
+			hide();
 		else
 			pane.setOpacity(1);
+	}
+	
+	public void hide()
+	{
+		pane.setOpacity(0);
+		resetSearch();
 	}
 	
 	private void resetSearch()

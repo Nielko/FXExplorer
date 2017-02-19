@@ -5,12 +5,17 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import Database.SerializableGraph;
+import Database.SerializableKnot;
 import Start.FXExplorer;
+import javafx.scene.paint.Color;
 
-public class Graph implements Serializable{
+public class Graph{
 	public Knot mainKnot;
 	public GraphSettings graphSettings;
 	public List<Knot> freeKnots;
+	private Color initColors[] = new Color[]{Color.ALICEBLUE, Color.BLANCHEDALMOND, Color.BURLYWOOD, Color.DARKCYAN, Color.DARKGREEN, Color.FUCHSIA, Color.FORESTGREEN, Color.LIMEGREEN, Color.WHEAT, Color.TOMATO,
+				Color.ORANGE, Color.BEIGE, Color.DARKCYAN, Color.CRIMSON, Color.DARKSEAGREEN, Color.DODGERBLUE, Color.TURQUOISE, Color.LAVENDERBLUSH, Color.LIGHTCORAL};
 	
 	/**
 	 * Hardgecodeder Test-Graph
@@ -18,11 +23,20 @@ public class Graph implements Serializable{
 	public Graph()
 	{
 		mainKnot = new Knot("Main", new Point(FXExplorer.SIZE_X/2, (int) (FXExplorer.SIZE_Y*0.3f)));
-		mainKnot.subKnots.add(new Knot("Test1", new Point(50,50)));
-		mainKnot.subKnots.add(new Knot("Test2", new Point(100,150)));
-		mainKnot.subKnots.add(new Knot("Test3", new Point(50,260)));
 		graphSettings = new GraphSettings();
+		graphSettings.setColor(initColors[(int) (Math.random()*initColors.length)]);
 		freeKnots = new ArrayList<Knot>();
+	}
+	
+	public Graph(SerializableGraph graph)
+	{
+		mainKnot = new Knot(graph.mainKnot);
+		graphSettings = new GraphSettings(graph);
+		freeKnots = new ArrayList<Knot>();
+		for(SerializableKnot k: graph.freeKnots)
+		{
+			freeKnots.add(new Knot(k));
+		}
 	}
 	
 	public Knot getKnot(Point position, int radius)

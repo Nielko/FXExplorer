@@ -3,6 +3,7 @@ import java.awt.Desktop;
 import java.awt.Point;
 import java.io.File;
 import java.net.URI;
+import java.util.Optional;
 
 import Graph.Graph;
 import Graph.Knot;
@@ -14,12 +15,16 @@ import Start.FXExplorer;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -47,6 +52,7 @@ public class Gui {
 	private MenuItem newSubKnot;
 	private MenuItem deleteSubKnot;
 	private MenuItem changeKnotPaths;
+	private Button btnLoad;
 	private Graph graph;
 	private Scene scene;
 	private SystemFileIcon sysIcon;
@@ -98,7 +104,7 @@ public class Gui {
         
        
         
-        Button btnLoad = new Button(">");
+        btnLoad = new Button(">");
         btnLoad.setTooltip(new Tooltip(Database.TextGui.ButtonLoadTooltip));
         pane.getChildren().add(btnLoad);
         btnLoad.relocate(10,50);
@@ -168,6 +174,12 @@ public class Gui {
                  }
             	 
             }
+        });
+        scene.addEventFilter(DragEvent.DRAG_DONE, new EventHandler<DragEvent>() {
+            @Override
+			public void handle(DragEvent event) { // Geht nicht!!
+				System.out.println(event.getDragboard().getString());
+			}
         });
         
         // Rechtsklickmenü, Fensterleiste, Suche, DragAndDrop initialisieren
@@ -246,6 +258,12 @@ public class Gui {
         });
 	}
 	
+	public void closeSearchOverlay()
+	{
+		btnLoad.setText("<");
+		searchOverlay.hide();
+	}
+	
 	public void redraw()
 	{
 		this.removeAllButtons();
@@ -275,6 +293,7 @@ public class Gui {
 				myCanvasStatic.addShadow();
 				myCanvasCircles.addShadow();
         	}
+			
 		}
 		catch(Exception e)
 		{
@@ -319,11 +338,17 @@ public class Gui {
 		if(knot.position.distance(knot.positionGui) > 5)
 			new AnimationGui().makeAnimations(knot, this);
 		myCanvasStatic.drawCircle(knot.position.x, knot.position.y, sizeSubKnot);
-		myCanvasStatic.drawImage(knot.ImgFile, knot.position.x, knot.position.y, sizeSubKnot*2-10);
+		// Großes Bild zeichnen
+		if(knot.isGraph())
+			myCanvasStatic.drawImage(knot.GraphImg, knot.position.x, knot.position.y, sizeSubKnot*2-10);
+		else
+			myCanvasStatic.drawImage(knot.ImgFile, knot.position.x, knot.position.y, sizeSubKnot*2-10);
+		
+		// Kleines Bild
 		if(knot.isWebLink())
 			myCanvasCircles.drawImage(knot.WeblinkImg, knot.position.x-20, knot.position.y+20, sizeSubKnot);
 		else if(knot.isGraph())
-			myCanvasCircles.drawImage(knot.GraphImg, knot.position.x-20, knot.position.y+20, sizeSubKnot);
+			;// nichts -- myCanvasCircles.drawImage(knot.GraphImg, knot.position.x-20, knot.position.y+20, sizeSubKnot);
 		else if(knot.File != null && !knot.File.equals(""))
 			myCanvasCircles.drawImage(SystemFileIcon.getFileIcon(knot.File), knot.position.x-20, knot.position.y+20, sizeSubKnot);
 	}
@@ -414,4 +439,23 @@ public class Gui {
 		this.primaryStage.setHeight(FXExplorer.SIZE_Y);
 	}
 	
+	public void saveSnapshot(String file)
+	{
+		//myCanvasStatic.exportSnapshot(file);
+	}
+	
+	public static boolean showMessagebox(String text1, String text2)
+	{
+		Alert alert = new Alert(AlertType.CONFIRMATION);
+		alert.setTitle("Confirmation Dialog");
+		alert.setHeaderText(text1);
+		alert.setContentText(text2);
+
+		Optional<ButtonType> result = alert.showAndWait();
+		if (result.get() == ButtonType.OK){
+		    return true;
+		} else {
+		    return false;
+		}
+	}
 }

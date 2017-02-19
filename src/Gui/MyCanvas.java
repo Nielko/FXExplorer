@@ -1,14 +1,23 @@
 package Gui;
 import java.awt.Point;
+import java.awt.image.RenderedImage;
 import java.io.File;
+import java.io.IOException;
+import java.util.logging.Logger;
+
+import javax.imageio.ImageIO;
 
 import Graph.GraphSettings;
 import Start.FXExplorer;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
+import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
 public class MyCanvas extends Canvas{
 	private GraphicsContext gc;
@@ -137,7 +146,10 @@ public class MyCanvas extends Canvas{
 					img = new Image(myfile.toURI().toURL().toExternalForm());
 				else
 					img = new Image(file);
-				gc.drawImage(img, x-w/2, y-w/2, w, w);
+				if(img.getWidth() < w)
+					gc.drawImage(img, x-img.getWidth()/2, y-img.getHeight()/2, img.getWidth(), img.getHeight());
+				else
+					gc.drawImage(img, x-w/2, y-w/2, w, w);
 			}
 		}
 		catch(Exception e)
@@ -165,5 +177,21 @@ public class MyCanvas extends Canvas{
 	{
 		gc.applyEffect(new DropShadow(15, 0, 0, settings.getColor()));
 		gc.applyEffect(new DropShadow(10, 0, 0, settings.getColor()));
+	}
+	
+	public void exportSnapshot(String fileS)
+	{
+		 try {
+			 File file = new File(fileS);
+             WritableImage writableImage = new WritableImage((int) this.getWidth(), (int) this.getHeight());
+             SnapshotParameters sParam = new SnapshotParameters();
+             sParam.setFill(new Color(0,0,1,0.0));
+             this.snapshot(sParam, writableImage);
+             RenderedImage renderedImage = SwingFXUtils.fromFXImage(writableImage, null);
+             ImageIO.write(renderedImage, "png", file);
+         } catch (IOException ex) {
+             //Logger.getLogger(this.class.getName()).log(Level.SEVERE, null, ex);
+        	 ex.printStackTrace();
+         }
 	}
 }

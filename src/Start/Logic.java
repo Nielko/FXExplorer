@@ -33,9 +33,8 @@ public class Logic {
 		this.gui = gui;
 		this.fileExplorer = new FileExplorer("/Users/nielskowala/Documents/Programmieren/workspace");
 		//gui.initGraph(fileExplorer.listFiles(), fileExplorer.isFolders(),new int[]{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1});
-		database = new GraphDatabase(file);
-		graph = database.graphs.get(0);
-		//graph = new Graph();
+		database = new GraphDatabase();
+		graph = database.getStartGraph();//database.load(file);
 		graph.mainKnot.VisibleSubKnots = true;
 		gui.initGraph(graph);
 		allKnots = graph.getAllKnots();
@@ -111,7 +110,7 @@ public class Logic {
 			}
 
 			@Override
-			public void buttonExitClicked() {
+			public boolean buttonExitClicked() {
 				// Main-Knoten wieder zurücksetzen und anschließend speichern
 				if(graph.mainKnot.VisibleSubKnots == false)
 				{
@@ -119,7 +118,14 @@ public class Logic {
 					graph.mainKnot.position = graph.mainKnot.positionGui;
 				}
 				if(database != null)
-					database.save();
+				{
+					if(database.save(graph) == false)
+						if(Gui.showMessagebox("Graph ist nicht gespeichert!", "Trotzdem fortfahren?") == false)
+							return false;
+					if(database.datName != null && !database.datName.equals(""))
+						gui.saveSnapshot(database.datName+"x");
+				}
+				return true;
 			}
 
 			// Logik für die Buttons im Rechtklick-Menü
@@ -201,9 +207,13 @@ public class Logic {
 			@Override
 			public void loadFile(String file) // Speichert unter der gespeicherten Adresse und öffnet die neue Datei
 			{
-				database.save();
-				database.load(file);
-				graph = database.graphs.get(0);
+				if(database.save(graph) == false)
+					if(Gui.showMessagebox("Graph ist nicht gespeichert!", "Trotzdem fortfahren?") == false)
+						return;
+				if(database.datName != null && !database.datName.equals(""))
+					gui.saveSnapshot(database.datName.substring(0, database.datName.length()-3)+"png");
+				
+				graph = database.load(file);
 				gui.removeAllButtons();
 				gui.initGraph(graph);
 				allKnots = graph.getAllKnots();
@@ -211,7 +221,24 @@ public class Logic {
 
 			@Override
 			public void saveFile(String file) {
-				database.saveAs(file);
+				database.saveAs(graph, file);
+				gui.saveSnapshot(file.substring(0, file.length()-3)+"png");
+				
+			}
+			
+			@Override
+			public void newGraph() {
+				if(database.save(graph) == false)
+					if(Gui.showMessagebox("Graph ist nicht gespeichert!", "Trotzdem fortfahren?") == false)
+						return;
+				if(database.datName != null && !database.datName.equals(""))
+					gui.saveSnapshot(database.datName.substring(0, database.datName.length()-3)+"png");
+				
+				graph = new Graph();
+				gui.removeAllButtons();
+				gui.initGraph(graph);
+				allKnots = graph.getAllKnots();
+				database.datName = null;
 			}
 
 			@Override
